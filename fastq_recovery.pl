@@ -24,7 +24,7 @@
 use warnings;
 use strict;
 use Getopt::Long;
-# TAKES an fastq as input and output all lines that agree to the fastq format. the first 4 lines must be OK. 
+# TAKES an fastq as input and output all lines that agree to the fastq format. The first 4 lines must be a nice read. 
 my $c=0;
 my $ok=1;
 my $verbose;
@@ -34,7 +34,12 @@ my %read_ids;
 my $acomment='';
 my $usage= "Usage:
 perl $0 -corrupted FILE.fastq [optional: -a additional.fastq] [optional: -verbose] [optional: -comment 'Something to add to the comment line of the additional reads that will be used to fill in the gaps']
-#\tBy default, it outputs reads in STDOUT\n";
+\t#By default, it outputs reads in STDOUT\n
+\t#The additional fastq should be an uncorrupted one, otherwise, run this script in it without
+\tusing the '-additional' parameter.
+\t#Also, a bug is that if the additional file contains reads that should not be in the original file,
+\tthe id is not checked yet, it will just concatenate them.
+";
 
 GetOptions ("corrupted_fastq=s" => \$corrupted_fastq,         # File to be checked and have its reads extracted
               "additional_fastq=s"   => \$additional_fastq,   # Optional Fastq which might have reads that were missing from the corrupted file. This file might be one after reads were processed or a copy of the original.
@@ -59,8 +64,9 @@ $MachineID=~s/^(@[-A-Z0-9]+:\d+:\w+).*([\s\/]+.*\n)/$1/ || die "Error at the fir
 my $idEND=$2;
 print $id.$sequence.$comment.$qual;
 $id=~s/[\/\s]+.*\n//;
-$read_ids{$id}=0; #changing 0 to undef may save RAM, as it is around 3 GB of RAM is used for a 7 GB fastq.
+$read_ids{$id}=0; #changing 0 to undef may save RAM. As it is now, around 3 GB of RAM is used for a 7 GB fastq.
 warn "LOOPING ...\n";
+
 ##Now begin to output only nice and good reads; 
 while(<CORRUPTED_FASTQ>){
 	if($c==0 || $ok == 0 ){
@@ -127,7 +133,7 @@ while(<CORRUPTED_FASTQ>){
 }
 close(CORRUPTED_FASTQ);
 warn "Finished looping $corrupted_fastq\n";
-if($additional_fastq){ #Obviously, the additional fastq should be a normal one
+if($aditional_fastq){ #The additional fastq should be an uncorrupted one, otherwise, run this script in it without using the '-additional' parameter
 	warn "Looping in $additional_fastq\n";
 	$c=0;
 	while(<ADDITIONAL_FASTQ>){
@@ -141,7 +147,7 @@ if($additional_fastq){ #Obviously, the additional fastq should be a normal one
 			chomp($line);            #+
 			$line.=$acomment."\n";
 			$line.=<ADDITIONAL_FASTQ>;#qual
-		print $line;	 
+			print $line;	 
 		}else{
 			$c=3;
 		}
