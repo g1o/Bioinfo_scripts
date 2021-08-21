@@ -1,7 +1,7 @@
 #!/bin/env perl
 #
 #Translate a fasta file in the specified frame or in all six frames if no frame was specified
-#The first argument is the Fasta file, the second is the minimum length of the tranlation (to exclude lots of  small proteins), and the third is the frame 
+#The first argument is the Fasta file, the second is the minimum length of the tranlation (to exclude lots of  small proteins), and the third is the frame [0,1,2] 
 #If you wish to use another codon table, edit this code (line 53: -codontable_id )
 # 
 # Require BioPerl
@@ -27,19 +27,19 @@
 use warnings;
 use strict;
 use Bio::SeqIO;
-my$file=shift;
+my $file=shift;
 my $minlength=shift;
-my$frame=shift;
+my $frame=shift;
 my $sequences = Bio::SeqIO->new( 
     -file   => $file,
     -format => "fasta",
 );
 if(! $minlength){
-	$minlength=10;
+	$minlength=2;
 }
 
 while ( my $dna = $sequences->next_seq ){
-	if($frame) {
+	if(defined($frame)) {
 		my $protein = $dna->translate( 
 				-codontable_id => 1, # standard genetic code
 				-frame         => $frame, #reading-frame offset 0
