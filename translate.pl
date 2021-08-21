@@ -2,7 +2,7 @@
 #
 #Translate a fasta file in the specified frame or in all six frames if no frame was specified
 #The first argument is the Fasta file, the second is the minimum length of the tranlation (to exclude lots of  small proteins), and the third is the frame 
-#If you wish to se other codon table, edit this code ( -codontable_id )
+#If you wish to use another codon table, edit this code (line 53: -codontable_id )
 # 
 # Require BioPerl
 #
