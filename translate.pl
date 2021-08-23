@@ -22,20 +22,21 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>
-#
-#
+###########################################################################
 use warnings;
 use strict;
 use Bio::SeqIO;
+
+my $usage= "\nTranslate a fasta file in the specified frame or in all six frames if no frame was specified \n 1º argument is the Fasta file \n 2º argument is the minimum length of the tranlation (to exclude lots of  small proteins) [default = 2] \n 3º argument is the frame (possible values= [0,1,2])  [default = 0] \n #Usage: \n\nperl $0 file.fasta 0 1 \n\n" ;
 my $file=shift;
-my $minlength=shift;
-my $frame=shift;
+my $minlength=shift ;
+my $frame=shift ; if(!defined($frame)){ die "$usage"};
 my $sequences = Bio::SeqIO->new( 
     -file   => $file,
     -format => "fasta",
 );
 if(! $minlength){
-	$minlength=2;
+	$minlength=5;
 }
 
 while ( my $dna = $sequences->next_seq ){
