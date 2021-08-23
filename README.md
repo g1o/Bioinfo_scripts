@@ -1,2 +1,2 @@
-# perl-scripts
-simple perl scripts
+# Perl-scripts
+ Problem solver scripts
