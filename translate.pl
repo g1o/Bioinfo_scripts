@@ -27,10 +27,12 @@ use warnings;
 use strict;
 use Bio::SeqIO;
 
-my $usage= "\nTranslate a fasta file in the specified frame or in all six frames if no frame was specified \n 1º argument is the Fasta file \n 2º argument is the minimum length of the tranlation (to exclude lots of  small proteins) [default = 2] \n 3º argument is the frame (possible values= [0,1,2])  [default = 0] \n #Usage: \n\nperl $0 file.fasta 0 1 \n\n" ;
+my $usage= "\nTranslate a fasta file in the specified frame or in all six frames if no frame was specified \n 1º argument is the Fasta file \n 2º argument is the minimum length of the tranlation (to exclude lots of  small proteins) [default = 2] \n 3º argument is the frame (possible values= [1,2,3,-1,-2,-3])  [default = 1] \n #Usage: \n\nperl $0 file.fasta 0 1 \n\n" ;
 my $file=shift;
+if(!defined($file)){ die "$usage"};
 my $minlength=shift ;
-my $frame=shift ; if(!defined($frame)){ die "$usage"};
+my $frame=shift ;
+
 my $sequences = Bio::SeqIO->new( 
     -file   => $file,
     -format => "fasta",
@@ -38,13 +40,29 @@ my $sequences = Bio::SeqIO->new(
 if(! $minlength){
 	$minlength=5;
 }
-
+my $frame_arg ;
+if (defined($frame)){
+$frame_arg = $frame;
+if( $frame < 0){
+	$frame=$frame*(-1)-1;
+}else{
+	$frame=$frame-1;
+}
+}
 while ( my $dna = $sequences->next_seq ){
 	if(defined($frame)) {
-		my $protein = $dna->translate( 
+		my $protein = $dna;
+		if( $frame_arg < 0){
+			$protein = $dna->revcom->translate(
+				-codontable_id => 1, # standard genetic code
+				-frame         => $frame, #reading-frame offset 0
+			);
+		}else{
+			$protein = $dna->translate( 
 				-codontable_id => 1, # standard genetic code
 				-frame         => $frame, #reading-frame offset 0
 				);
+			}
 		print ">",$dna->display_id, "\n";
 		print $protein->seq, "\n\n";
 	}
